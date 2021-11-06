@@ -8,5 +8,8 @@ namespace RepositoryPattern
     {
         List<BookDTO> GetBooks();
         BookDTO GetBook(int id);
+        bool AddBook(BookDTO bookDto);
+        bool DeleteBook(int id);
+        bool RateBook(int id, int rate);
     }
 }

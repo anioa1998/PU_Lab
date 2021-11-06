@@ -8,5 +8,6 @@ namespace RepositoryPattern
 {
     interface IAuthorRepository
     {
+
     }
 }

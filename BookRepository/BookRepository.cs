@@ -30,7 +30,7 @@ namespace RepositoryPattern
                     AverageRate = averageRate,
                     RatesCount = book.Rates.Count,
                     ReleaseDate = book.ReleaseDate,
-                    Authors = authorsId
+                    //Authors = authorsId
                 });
             }
 
@@ -50,7 +50,7 @@ namespace RepositoryPattern
                 AverageRate = averageRate,
                 RatesCount = book.Rates.Count,
                 ReleaseDate = book.ReleaseDate,
-                Authors = authorsId
+                //Authors = authorsId
             };
             return bookDto;
         }
@@ -58,6 +58,21 @@ namespace RepositoryPattern
         public void Dispose()
         {
             // throw new NotImplementedException();
+        }
+
+        public bool AddBook(BookDTO bookDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool DeleteBook(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool RateBook(int id, int rate)
+        {
+            throw new NotImplementedException();
         }
     }
 }
