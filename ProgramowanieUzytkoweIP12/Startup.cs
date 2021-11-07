@@ -1,5 +1,6 @@
 
 using CQRS;
+using CQRS.AuthorFiles.Commands;
 using CQRS.AuthorFiles.Handlers;
 using CQRS.AuthorFiles.Queries;
 using CQRS.BookFiles.Commands;
@@ -42,8 +43,11 @@ namespace ProgramowanieUzytkoweIP12
             services.AddScoped<CommandBus>();
             services.AddScoped<QueryBus>();
             services.AddScoped<ICommandHandler<AddBookCommand>, AddBookCommandHandler>();
+            services.AddScoped<ICommandHandler<AddAuthorCommand>, AddAuthorCommandHandler>();
             services.AddScoped<ICommandHandler<AddBookRateCommand>, AddBookRateCommandHandler>();
+            services.AddScoped<ICommandHandler<AddAuthorRateCommand>, AddAuthorRateCommandHandler>();
             services.AddScoped<ICommandHandler<DeleteBookCommand>, DeleteBookCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteAuthorCommand>, DeleteAuthorCommandHandler>();
             services.AddScoped<IQueryHandler<GetBooksQuery, List<GetBookDTO>>, GetBooksQueryHandler>();
             services.AddScoped<IQueryHandler<GetAuthorsQuery, List<GetAuthorDTO>>, GetAuthorsQueryHandler>();
             services.AddScoped<IQueryHandler<GetBookQuery, GetBookDTO>, GetBookQueryHandler>();
