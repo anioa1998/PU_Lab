@@ -12,11 +12,11 @@ namespace MediatRProject.BookFiles.Commands
 {
     public record AddMediatRBookCommand(AddBookDTO bookDTO) : IRequest<bool>;
 
-    public class AddMediatRBookCommandHandler : IRequestHandler<DeleteMediatRBookCommand, bool>
+    public class AddMediatRBookCommandHandler : IRequestHandler<AddMediatRBookCommand, bool>
     {
         private readonly AppDbContext _appDbContext;
 
-        public Task<bool> Handle(DeleteMediatRBookCommand request, CancellationToken cancellationToken)
+        public Task<bool> Handle(AddMediatRBookCommand request, CancellationToken cancellationToken)
         {
             Book book = new Book(request.bookDTO.Title, request.bookDTO.ReleaseDate);
             book.Authors = _appDbContext.Authors.Where(a => request.bookDTO.AuthorIds.Contains(a.Id)).ToList();

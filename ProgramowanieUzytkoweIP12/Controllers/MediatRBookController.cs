@@ -33,21 +33,21 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             return _mediator.Send(query);
         }
         [HttpPost("AddBook")]
-        public Task<bool> AddBook([FromBody] DeleteMediatRBookCommand command)
+        public Task<bool> AddBook([FromBody] AddMediatRBookCommand command)
         {
             return _mediator.Send(command);
         }
 
         [HttpDelete("DeleteBook")]
-        public void DeleteBook([FromQuery] int id)
+        public Task<bool> DeleteBook([FromQuery] DeleteMediatRBookCommand command)
         {
-            _commandBus.Handle(new DeleteBookCommand(id));
+            return _mediator.Send(command);
         }
 
         [HttpPost("AddRate")]
-        public void AddRate([FromBody] AddBookRateCommand command)
+        public Task<bool> AddRate([FromBody] AddMediatRBookRateCommand command)
         {
-            _commandBus.Handle(command);
+            return _mediator.Send(command);
         }
     }
 }
