@@ -4,9 +4,12 @@ using System.Collections.Generic;
 
 namespace RepositoryPattern
 {
-    public interface IBookRepository : IDisposable
+    public interface IBookRepository
     {
-        List<BookDTO> GetBooks();
-        BookDTO GetBook(int id);
+        List<GetBookDTO> GetBooks(PaginationDTO pagination);
+        GetBookDTO GetBook(int id);
+        bool AddBook(AddBookDTO bookDto);
+        bool DeleteBook(int id);
+        bool RateBook(int id, short rate);
     }
 }

@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace Model.DTOs
 {
-    public class AuthorDTO
-    {
-    }
+    public record BookInGetAuthorDTO(int Id, string Title);
 }

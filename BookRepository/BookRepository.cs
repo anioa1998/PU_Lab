@@ -14,50 +14,92 @@ namespace RepositoryPattern
         {
             _appDbContext = appDbContext;
         }
-        public List<BookDTO> GetBooks()
+        public List<GetBookDTO> GetBooks(PaginationDTO pagination)
         {
-            var books = _appDbContext.Books.Include("Authors").Include("Rates").ToList();
-            var bookDtoList = new List<BookDTO>();
+            var books = _appDbContext.Books.Include("Authors")
+                                           .Include("Rates")
+                                           .Skip(pagination.Page * pagination.Count)
+                                           .Take(pagination.Count)
+                                           .ToList();
+
+            var bookDtoList = new List<GetBookDTO>();
             foreach (var book in books)
             {
-                var averageRate = Convert.ToInt16(book.Rates.Average(b => b.Value));
-                var authorsId = new List<int>();
-                //book.Authors.ForEach(a => authors.Add(new AuthorInBookDTO() { Id = a.Id, FirstName = a.FirstName, SecondName = a.SecondName }));
-                bookDtoList.Add(new BookDTO()
-                {
-                    Id = book.Id,
-                    Title = book.Title,
-                    AverageRate = averageRate,
-                    RatesCount = book.Rates.Count,
-                    ReleaseDate = book.ReleaseDate,
-                    Authors = authorsId
-                });
+                bookDtoList.Add(ExtractBookDTO(book));
             }
 
             return bookDtoList;
         }
 
-        public BookDTO GetBook(int id)
+        public GetBookDTO GetBook(int id)
         {
-            var book = _appDbContext.Books.Include("Authors").Include("Rates").Where(b => b.Id == id).FirstOrDefault();
-            var averageRate = Convert.ToInt16(book.Rates.Average(b => b.Value));
-            var authorsId = new List<int>();
-           // book.Authors.ForEach(a => authorsId.Add(new AuthorInBookDTO() { Id = a.Id, FirstName = a.FirstName, SecondName = a.SecondName }));
-            var bookDto = new BookDTO()
-            {
-                Id = book.Id,
-                Title = book.Title,
-                AverageRate = averageRate,
-                RatesCount = book.Rates.Count,
-                ReleaseDate = book.ReleaseDate,
-                Authors = authorsId
-            };
-            return bookDto;
+            var book = _appDbContext.Books.Include("Authors")
+                                          .Include("Rates")
+                                          .First(b => b.Id == id);
+            return ExtractBookDTO(book);
         }
 
-        public void Dispose()
+        public bool AddBook(AddBookDTO bookDto)
         {
-            // throw new NotImplementedException();
+            
+            var newBook = new Book(bookDto.Title, bookDto.ReleaseDate);
+            newBook.Authors = _appDbContext.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToList();
+
+            try
+            {
+                _appDbContext.Books.Add(newBook);
+                _appDbContext.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
+
+        public bool DeleteBook(int id)
+        {
+            try
+            {
+                var book = _appDbContext.Books.Single(b => b.Id == id);
+                var bookRates = _appDbContext.BookRates.Where(br => br.FkBook == id);
+                _appDbContext.BookRates.RemoveRange(bookRates);
+                _appDbContext.Books.Remove(book);
+                _appDbContext.SaveChanges();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public bool RateBook(int id, short rate)
+        {
+            try
+            {
+                var book = _appDbContext.Books.Single(b => b.Id == id);
+                var newRate = new BookRate() { Type = RateType.BookRate, Book = book, Date = DateTime.Now, FkBook = id, Value = rate };
+                _appDbContext.BookRates.Add(newRate);
+                _appDbContext.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private GetBookDTO ExtractBookDTO(Book book)
+        {
+            var authorsDtos = new List<AuthorInGetBookDTO>();
+            var rateCount = book.Rates.Count();
+            var averageRate = Math.Round(book.Rates.Average(b => b.Value), 1);
+
+            book.Authors.ForEach(a => authorsDtos.Add(new AuthorInGetBookDTO(a.Id, a.FirstName, a.SecondName)));
+            return new GetBookDTO(book.Id, book.Title, book.ReleaseDate, averageRate, rateCount, authorsDtos);
+        }
+
+        
     }
 }

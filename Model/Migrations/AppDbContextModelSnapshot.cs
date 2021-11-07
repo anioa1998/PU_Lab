@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Model;
 using Model.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -35,7 +34,7 @@ namespace Model.Migrations
                     b.ToTable("AuthorBook");
                 });
 
-            modelBuilder.Entity("Model.Author", b =>
+            modelBuilder.Entity("Model.Models.Author", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,7 +52,7 @@ namespace Model.Migrations
                     b.ToTable("Authors");
                 });
 
-            modelBuilder.Entity("Model.Book", b =>
+            modelBuilder.Entity("Model.Models.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,7 +70,7 @@ namespace Model.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Model.Rate", b =>
+            modelBuilder.Entity("Model.Models.Rate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,9 +93,9 @@ namespace Model.Migrations
                     b.HasDiscriminator<int>("Type");
                 });
 
-            modelBuilder.Entity("Model.AuthorRate", b =>
+            modelBuilder.Entity("Model.Models.AuthorRate", b =>
                 {
-                    b.HasBaseType("Model.Rate");
+                    b.HasBaseType("Model.Models.Rate");
 
                     b.Property<int?>("AuthorId")
                         .HasColumnType("integer");
@@ -109,9 +108,9 @@ namespace Model.Migrations
                     b.HasDiscriminator().HasValue(0);
                 });
 
-            modelBuilder.Entity("Model.BookRate", b =>
+            modelBuilder.Entity("Model.Models.BookRate", b =>
                 {
-                    b.HasBaseType("Model.Rate");
+                    b.HasBaseType("Model.Models.Rate");
 
                     b.Property<int?>("BookId")
                         .HasColumnType("integer");
@@ -126,43 +125,43 @@ namespace Model.Migrations
 
             modelBuilder.Entity("AuthorBook", b =>
                 {
-                    b.HasOne("Model.Author", null)
+                    b.HasOne("Model.Models.Author", null)
                         .WithMany()
                         .HasForeignKey("AuthorsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Model.Book", null)
+                    b.HasOne("Model.Models.Book", null)
                         .WithMany()
                         .HasForeignKey("BooksId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Model.AuthorRate", b =>
+            modelBuilder.Entity("Model.Models.AuthorRate", b =>
                 {
-                    b.HasOne("Model.Author", "Author")
+                    b.HasOne("Model.Models.Author", "Author")
                         .WithMany("Rates")
                         .HasForeignKey("AuthorId");
 
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("Model.BookRate", b =>
+            modelBuilder.Entity("Model.Models.BookRate", b =>
                 {
-                    b.HasOne("Model.Book", "Book")
+                    b.HasOne("Model.Models.Book", "Book")
                         .WithMany("Rates")
                         .HasForeignKey("BookId");
 
                     b.Navigation("Book");
                 });
 
-            modelBuilder.Entity("Model.Author", b =>
+            modelBuilder.Entity("Model.Models.Author", b =>
                 {
                     b.Navigation("Rates");
                 });
 
-            modelBuilder.Entity("Model.Book", b =>
+            modelBuilder.Entity("Model.Models.Book", b =>
                 {
                     b.Navigation("Rates");
                 });

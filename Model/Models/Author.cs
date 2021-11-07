@@ -9,5 +9,11 @@ namespace Model.Models
         public string SecondName { get; set; }
         public List<Book> Books { get; set; }
         public List<AuthorRate> Rates { get; set; }
+
+        public Author(string firstName, string secondName)
+        {
+            FirstName = firstName;
+            SecondName = secondName;
+        }
     }
 }
