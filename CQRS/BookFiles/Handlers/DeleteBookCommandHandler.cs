@@ -1,6 +1,7 @@
-﻿using Model.Models;
+﻿using CQRS.BookFiles.Commands;
+using Model.Models;
 
-namespace CQRS
+namespace CQRS.BookFiles.Handlers
 {
     public class DeleteBookCommandHandler : ICommandHandler<DeleteBookCommand>
     {

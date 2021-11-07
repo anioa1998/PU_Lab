@@ -18,7 +18,7 @@ namespace RepositoryPattern
         {
             var books = _appDbContext.Books.Include("Authors")
                                            .Include("Rates")
-                                           .Skip(pagination.Page * pagination.Count)
+                                           .Skip((pagination.Page - 1) * pagination.Count)
                                            .Take(pagination.Count)
                                            .ToList();
 
@@ -61,7 +61,7 @@ namespace RepositoryPattern
         {
             try
             {
-                var book = _appDbContext.Books.Single(b => b.Id == id);
+                var book = _appDbContext.Books.Find(id);
                 var bookRates = _appDbContext.BookRates.Where(br => br.FkBook == id);
                 _appDbContext.BookRates.RemoveRange(bookRates);
                 _appDbContext.Books.Remove(book);
@@ -78,7 +78,7 @@ namespace RepositoryPattern
         {
             try
             {
-                var book = _appDbContext.Books.Single(b => b.Id == id);
+                var book = _appDbContext.Books.Find(id);
                 var newRate = new BookRate() { Type = RateType.BookRate, Book = book, Date = DateTime.Now, FkBook = id, Value = rate };
                 _appDbContext.BookRates.Add(newRate);
                 _appDbContext.SaveChanges();
@@ -99,7 +99,6 @@ namespace RepositoryPattern
             book.Authors.ForEach(a => authorsDtos.Add(new AuthorInGetBookDTO(a.Id, a.FirstName, a.SecondName)));
             return new GetBookDTO(book.Id, book.Title, book.ReleaseDate, averageRate, rateCount, authorsDtos);
         }
-
-        
+                
     }
 }

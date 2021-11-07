@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CQRS
+namespace CQRS.AuthorFiles.Commands
 {
-    public record AddBookCommand (string Title, DateTime ReleaseDate, List<int> AuthorsId) : ICommand;
+    public record AddAuthorRateCommand(int id, short rate) : ICommand;
 }

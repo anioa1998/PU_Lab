@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CQRS
+namespace CQRS.AuthorFiles.Queries
 {
-    public record GetBooksQuery(int Page, int Count) : IQuery; 
+    public record GetAuthorsQuery(int Page, int Count) : IQuery;
 }
