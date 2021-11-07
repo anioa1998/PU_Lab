@@ -1,5 +1,9 @@
 
 using CQRS;
+using CQRS.BookFiles.Commands;
+using CQRS.BookFiles.Handlers;
+using CQRS.BookFiles.Queries;
+using CQRS.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -30,11 +34,15 @@ namespace ProgramowanieUzytkoweIP12
             services.AddDbContext<AppDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             
             services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IBooksHelper, BooksHelper>();
             services.AddScoped<CommandBus>();
             services.AddScoped<QueryBus>();
             services.AddScoped<ICommandHandler<AddBookCommand>, AddBookCommandHandler>();
+            services.AddScoped<ICommandHandler<AddBookRateCommand>, AddBookRateCommandHandler>();
             services.AddScoped<ICommandHandler<DeleteBookCommand>, DeleteBookCommandHandler>();
             services.AddScoped<IQueryHandler<GetBooksQuery, List<GetBookDTO>>, GetBooksQueryHandler>();
+            services.AddScoped<IQueryHandler<GetBookQuery, GetBookDTO>, GetBookQueryHandler>();
 
         }
 

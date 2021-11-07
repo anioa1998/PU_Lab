@@ -8,4 +8,10 @@
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="AuthorFiles\Commands\" />
+    <Folder Include="AuthorFiles\Handlers\" />
+    <Folder Include="AuthorFiles\Queries\" />
+  </ItemGroup>
+
 </Project>
