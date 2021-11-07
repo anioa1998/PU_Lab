@@ -38,7 +38,7 @@ namespace RepositoryPattern
         {
             try
             {
-                var author = _appDbContext.Authors.Find(id)
+                var author = _appDbContext.Authors.Find(id);
                 var newRate = new AuthorRate() { Type = RateType.AuthorRate, Author = author, Date = DateTime.Now, FkAuthor = id, Value = rate };
                 _appDbContext.AuthorRate.Add(newRate);
                 _appDbContext.SaveChanges();
@@ -54,7 +54,7 @@ namespace RepositoryPattern
         {
             try
             {
-                var author = _appDbContext.Authors.Find(id)
+                var author = _appDbContext.Authors.Find(id);
                 var authorRates = _appDbContext.AuthorRate.Where(br => br.Id == id);
                 _appDbContext.AuthorRate.RemoveRange(authorRates);
                 _appDbContext.Authors.Remove(author);

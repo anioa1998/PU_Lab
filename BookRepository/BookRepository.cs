@@ -18,7 +18,7 @@ namespace RepositoryPattern
         {
             var books = _appDbContext.Books.Include("Authors")
                                            .Include("Rates")
-                                           .Skip(pagination.Page * pagination.Count)
+                                           .Skip((pagination.Page - 1) * pagination.Count)
                                            .Take(pagination.Count)
                                            .ToList();
 
