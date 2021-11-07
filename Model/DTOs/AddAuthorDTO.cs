@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace Model.DTOs
 {
-    class AddAuthorDTO
-    {
-    }
+    public record AddAuthorDTO(string FirstName, string SecondName);
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Model.DTOs;
+using RepositoryPattern;
 using System.Collections.Generic;
 
 
@@ -7,38 +8,57 @@ namespace ProgramowanieUzytkoweIP12.Controllers
 {
     public class AuthorController : Controller
     {
-        //private readonly IAuthorRepository _authorRepository;
+        private readonly IAuthorRepository _authorRepository;
 
-        //public AuthorController(IAuthorRepository authorRepository)
-        //{
-        //    _authorRepository = authorRepository;
-        //}
+        public AuthorController(IAuthorRepository authorRepository)
+        {
+            _authorRepository = authorRepository;
+        }
 
         [HttpGet("GetAuthors")]
-        public ActionResult<IEnumerable<GetAuthorDTO>> GetBooks([FromQuery] PaginationDTO pagination)
+        public ActionResult<IEnumerable<GetAuthorDTO>> GetAuthors([FromQuery] PaginationDTO pagination)
         {
-            return Ok();
+            return _authorRepository.GetAuthors(pagination);
         }
 
-        [HttpGet("GetAuthor/{id}")]
-        public ActionResult<GetBookDTO> GetBook(int id)
-        {
-            return Ok();
-        }
         [HttpPost("AddAuthor")]
-        public ActionResult AddBook(GetBookDTO book)
+        public ActionResult AddAuthor(AddAuthorDTO author)
         {
-            return Ok();
+            var result = _authorRepository.AddAuthor(author);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Unable to add new author. Try again.");
+            }
         }
         [HttpDelete("DeleteAuthor/{id}")]
-        public ActionResult DeleteBook(int id)
+        public ActionResult DeleteAuthor(int id)
         {
-            return Ok();
+            var result = _authorRepository.DeleteAuthor(id);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
         [HttpPost("AddRate")]
-        public ActionResult AddRate([FromQuery] int id, [FromQuery] int rate)
+        public ActionResult AddRate([FromQuery] int id, [FromQuery] short rate)
         {
-            return Ok();
+            var result = _authorRepository.AddRate(id, rate);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
     }
 }

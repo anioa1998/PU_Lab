@@ -9,9 +9,9 @@ namespace RepositoryPattern
 {
     public interface IAuthorRepository
     {
-        public List<GetAuthorDTO> GetAuthors();
-        public bool AddAuthor(GetAuthorDTO authorDTO);
+        public List<GetAuthorDTO> GetAuthors(PaginationDTO pagination);
+        public bool AddAuthor(AddAuthorDTO authorDTO);
         public bool DeleteAuthor(int id);
-        public bool AddRate(int id, int rate);
+        public bool AddRate(int id, short rate);
     }
 }
