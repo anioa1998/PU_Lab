@@ -22,9 +22,9 @@ namespace ProgramowanieUzytkoweIP12.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<BookDTO> GetBooks([FromQuery] GetBooksQuery query)
+        public IEnumerable<GetBookDTO> GetBooks([FromQuery] GetBooksQuery query)
         {
-            return _queryBus.Handle<GetBooksQuery, List<BookDTO>>(query);
+            return _queryBus.Handle<GetBooksQuery, List<GetBookDTO>>(query);
         }
 
         [HttpPost]

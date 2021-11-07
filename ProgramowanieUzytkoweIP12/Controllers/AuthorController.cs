@@ -15,18 +15,18 @@ namespace ProgramowanieUzytkoweIP12.Controllers
         //}
 
         [HttpGet("GetAuthors")]
-        public ActionResult<IEnumerable<AuthorDTO>> GetBooks([FromQuery] PaginationDTO pagination)
+        public ActionResult<IEnumerable<GetAuthorDTO>> GetBooks([FromQuery] PaginationDTO pagination)
         {
             return Ok();
         }
 
         [HttpGet("GetAuthor/{id}")]
-        public ActionResult<BookDTO> GetBook(int id)
+        public ActionResult<GetBookDTO> GetBook(int id)
         {
             return Ok();
         }
         [HttpPost("AddAuthor")]
-        public ActionResult AddBook(BookDTO book)
+        public ActionResult AddBook(GetBookDTO book)
         {
             return Ok();
         }

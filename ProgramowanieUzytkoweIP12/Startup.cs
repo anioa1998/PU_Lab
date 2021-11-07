@@ -34,7 +34,7 @@ namespace ProgramowanieUzytkoweIP12
             services.AddScoped<QueryBus>();
             services.AddScoped<ICommandHandler<AddBookCommand>, AddBookCommandHandler>();
             services.AddScoped<ICommandHandler<DeleteBookCommand>, DeleteBookCommandHandler>();
-            services.AddScoped<IQueryHandler<GetBooksQuery, List<BookDTO>>, GetBooksQueryHandler>();
+            services.AddScoped<IQueryHandler<GetBooksQuery, List<GetBookDTO>>, GetBooksQueryHandler>();
 
         }
 

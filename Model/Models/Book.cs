@@ -10,5 +10,11 @@ namespace Model.Models
         public DateTime ReleaseDate { get; set; }
         public List<Author> Authors { get; set; }
         public List<BookRate> Rates { get; set; }
+
+        public Book(string title, DateTime releaseDate)
+        {
+            Title = title;
+            ReleaseDate = releaseDate;
+        }
     }
 }

@@ -17,30 +17,56 @@ namespace ProgramowanieUzytkoweIP12.Controllers
         }
 
         [HttpGet("GetBooks")]
-        public ActionResult<IEnumerable<BookDTO>> GetBooks([FromQuery] PaginationDTO pagination)
+        public ActionResult<IEnumerable<GetBookDTO>> GetBooks([FromQuery] PaginationDTO pagination)
         {
-            return _bookRepository.GetBooks();
+            return _bookRepository.GetBooks(pagination);
         }
 
-        [HttpGet("GetBook/{id}")]
-        public ActionResult<BookDTO> GetBook(int id)
+        [HttpGet("GetBook")]
+        public ActionResult<GetBookDTO> GetBook([FromQuery] int id)
         {
             return _bookRepository.GetBook(id);
         }
         [HttpPost("AddBook")]
-        public ActionResult AddBook(BookDTO book)
+        public ActionResult AddBook([FromBody] AddBookDTO book)
         {
-            return Ok();
+
+            var result = _bookRepository.AddBook(book);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Unable to add new book. Try again.");
+            }
+
         }
-        [HttpDelete("DeleteBook/{id}")]
-        public ActionResult DeleteBook(int id)
+        [HttpDelete("DeleteBook")]
+        public ActionResult DeleteBook([FromQuery] int id)
         {
-            return Ok();
+            var result = _bookRepository.DeleteBook(id);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
         [HttpPost("AddRate")]
-        public ActionResult AddRate([FromQuery] int id, [FromQuery] int rate)
+        public ActionResult AddRate([FromQuery] int id, [FromQuery] short rate)
         {
-            return Ok();
+            var result = _bookRepository.RateBook(id, rate);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
     }
 }
