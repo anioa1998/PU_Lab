@@ -120,6 +120,7 @@ namespace RepositoryPattern
             _elasticHelper.CreateIndex();
             CleanUpDatabase();
             GenerateAuthors();
+            GenerateBooks();
         }
 
         private void CleanUpDatabase()
@@ -160,6 +161,49 @@ namespace RepositoryPattern
             _appDbContext.SaveChanges();
         }
 
+        private void GenerateBooks()
+        {
+            var random = new Random();
+
+            var titles = new List<string> { "Harry Potter i Kamień Filozoficzny",
+                                            "Harry Potter i Czara Ognia",
+                                            "Mindf*ck. Cambridge Analytica, czyli jak popsuć demokrację.",
+                                            "Mali Bogowie",
+                                            "Mali Bogowie 2",
+                                            "Jedyny samolot na niebie",
+                                            "27 śmierci Toby'ego Obeda",
+                                            "Wiedźmin: Krew Elfów",
+                                            "Sekretne życie mózgu nastolatka",
+                                            "Przygody Robinsona Crusoe"};
+
+            var books = new List<Book>();
+            var bookRates = new List<BookRate>();
+            var authors = _appDbContext.Authors.ToList();
+
+            foreach (var title in titles)
+            {
+                var book = new Book(title, DateTime.Now, RandomString(1000));
+                for (int i = 0; i < random.Next(1, 5); i++)
+                {
+                    book.Authors.Add(authors[random.Next(0, authors.Count() - 1)]);
+                }
+            }
+
+            _appDbContext.Books.AddRange(books);
+            _appDbContext.SaveChanges();
+            var booksWithIds = _appDbContext.Books.ToList();
+
+            foreach (var book in booksWithIds)
+            {
+                for (int j = 0; j < random.Next(1, 5); j++)
+                {
+                    bookRates.Add(new BookRate() { Type = RateType.BookRate, Book = book, Date = DateTime.Now, FkBook = book.Id, Value = (short)random.Next(1, 5) });
+                }
+            }
+
+            _appDbContext.BookRates.AddRange(bookRates);
+            _appDbContext.SaveChanges();
+        }
         private string GenerateAuthorName()
         {
             var random = new Random();
