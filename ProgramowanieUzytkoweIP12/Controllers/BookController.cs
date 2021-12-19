@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Model.DTOs;
+using Nest;
 using RepositoryPattern;
+using System;
 using System.Collections.Generic;
 
 namespace ProgramowanieUzytkoweIP12.Controllers
@@ -68,5 +70,21 @@ namespace ProgramowanieUzytkoweIP12.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("CreateIndex")]
+        public ActionResult CreateIndex()
+        {
+            try
+            {
+                _bookRepository.StartupCreateIndex();
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
     }
 }

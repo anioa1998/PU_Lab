@@ -20,7 +20,7 @@ namespace RepositoryPattern
 
         public bool AddAuthor(AddAuthorDTO authorDTO)
         {
-            var newAuthor = new Author(authorDTO.FirstName, authorDTO.SecondName);
+            var newAuthor = new Author(authorDTO.FirstName, authorDTO.SecondName, RandomString(1000));
 
             try
             {
@@ -88,10 +88,18 @@ namespace RepositoryPattern
         {
             var authorsDtos = new List<BookInGetAuthorDTO>();
             var rateCount = author.Rates.Count();
-            var averageRate = Math.Round(author.Rates.Average(b => b.Value), 1);
-
+            var averageRate = author.Rates.Count > 0 ? Math.Round(author.Rates.Average(b => b.Value), 1) : 0;
+            
             author.Books.ForEach(a => authorsDtos.Add(new BookInGetAuthorDTO(a.Id, a.Title)));
-            return new GetAuthorDTO(author.Id, author.FirstName, author.SecondName, averageRate, rateCount, authorsDtos);
+            return new GetAuthorDTO(author.Id, author.FirstName, author.SecondName, author.Cv, averageRate, rateCount, authorsDtos);
+        }
+
+        public string RandomString(int length)
+        {
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

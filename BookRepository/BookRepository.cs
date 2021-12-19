@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Model.DTOs;
 using Model.Models;
+using RepositoryPattern.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,17 @@ namespace RepositoryPattern
     public class BookRepository : IBookRepository
     {
         private readonly AppDbContext _appDbContext;
-        public BookRepository(AppDbContext appDbContext)
+        private readonly IElasticHelper _elasticHelper;
+        public BookRepository(AppDbContext appDbContext, IElasticHelper elasticHelper)
         {
             _appDbContext = appDbContext;
+            _elasticHelper = elasticHelper;
         }
         public List<GetBookDTO> GetBooks(PaginationDTO pagination)
         {
             var books = _appDbContext.Books.Include("Authors")
                                            .Include("Rates")
-                                           .Skip((pagination.Page - 1) * pagination.Count)
+                                           .Skip((pagination.Page) * pagination.Count)
                                            .Take(pagination.Count)
                                            .ToList();
 
@@ -41,14 +44,26 @@ namespace RepositoryPattern
 
         public bool AddBook(AddBookDTO bookDto)
         {
-            
-            var newBook = new Book(bookDto.Title, bookDto.ReleaseDate);
+
+            var newBook = new Book(bookDto.Title, bookDto.ReleaseDate, RandomString(1000));
             newBook.Authors = _appDbContext.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToList();
 
             try
             {
                 _appDbContext.Books.Add(newBook);
                 _appDbContext.SaveChanges();
+
+                var getBookDTO = new GetBookDTO(newBook.Id,
+                                                newBook.Title,
+                                                newBook.ReleaseDate,
+                                                newBook.Description,
+                                                0,
+                                                0,
+                                                newBook.Authors.Select(a => new AuthorInGetBookDTO(a.Id, a.FirstName, a.SecondName))
+                                                               .ToList());
+
+
+
                 return true;
             }
             catch
@@ -68,7 +83,7 @@ namespace RepositoryPattern
                 _appDbContext.SaveChanges();
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -94,11 +109,82 @@ namespace RepositoryPattern
         {
             var authorsDtos = new List<AuthorInGetBookDTO>();
             var rateCount = book.Rates.Count();
-            var averageRate = Math.Round(book.Rates.Average(b => b.Value), 1);
+            var averageRate = book.Rates.Count > 0 ? Math.Round(book.Rates.Average(b => b.Value), 1) : 0;
 
             book.Authors.ForEach(a => authorsDtos.Add(new AuthorInGetBookDTO(a.Id, a.FirstName, a.SecondName)));
-            return new GetBookDTO(book.Id, book.Title, book.ReleaseDate, averageRate, rateCount, authorsDtos);
+            return new GetBookDTO(book.Id, book.Title, book.ReleaseDate, book.Description, averageRate, rateCount, authorsDtos);
         }
-                
+
+        public void StartupCreateIndex()
+        {
+            _elasticHelper.CreateIndex();
+            CleanUpDatabase();
+            GenerateAuthors();
+        }
+
+        private void CleanUpDatabase()
+        {
+            _appDbContext.Books.RemoveRange(_appDbContext.Books);
+            _appDbContext.BookRates.RemoveRange(_appDbContext.BookRates);
+            _appDbContext.Authors.RemoveRange(_appDbContext.Authors);
+            _appDbContext.AuthorRate.RemoveRange(_appDbContext.AuthorRate);
+
+            _appDbContext.SaveChanges();
+        }
+
+        private void GenerateAuthors()
+        {
+            var authors = new List<Author>();
+            var authorRates = new List<AuthorRate>();
+
+            var random = new Random();
+
+            for (int i = 0; i < 10; i++)
+            {
+                authors.Add(new Author(GenerateAuthorName(), GenerateAuthorSurname(), RandomString(1000)));
+            }
+
+            _appDbContext.Authors.AddRange(authors);
+            _appDbContext.SaveChanges();
+            var authorsWithIds = _appDbContext.Authors.ToList();
+
+            foreach (var author in authorsWithIds)
+            {
+                for (int j = 0; j < random.Next(1, 5); j++)
+                {
+                    authorRates.Add(new AuthorRate() { Type = RateType.AuthorRate, Author = author, Date = DateTime.Now, FkAuthor = author.Id, Value = (short)random.Next(1, 5) });
+                }
+            }
+
+            _appDbContext.AuthorRate.AddRange(authorRates);
+            _appDbContext.SaveChanges();
+        }
+
+        private string GenerateAuthorName()
+        {
+            var random = new Random();
+            var names = new List<string>() {"Michael","Christopher","Jessica","Matthew","Ashley","Jennifer",
+                                            "Joshua","Amanda","Daniel","David","James","Robert","John","Joseph",
+                                            "Andrew","Ryan","Brandon","Jason","Justin","Sarah"};
+            return names[random.Next(0, names.Count - 1)];
+
+        }
+
+        private string GenerateAuthorSurname()
+        {
+            var random = new Random();
+            var surnames = new List<string> { "Smith","Johnson","Williams","Brown","Jones","Miller","Davis",
+                                              "Garcia","Rodriguez","Wilson","Martinez","Anderson","Taylor",
+                                              "Thomas","Hernandez","Moore"};
+            return surnames[random.Next(0, surnames.Count - 1)];
+        }
+
+        public string RandomString(int length)
+        {
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
     }
 }

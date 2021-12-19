@@ -19,6 +19,12 @@ namespace MediatRProject.AuthorFiles.Queries
         private readonly AppDbContext _appDbContext;
         private readonly IAuthorsHelper _authorsHelper;
 
+        public GetMediatRAuthorsQueryHandler(IAuthorsHelper authorsHelper, AppDbContext appDbContext)
+        {
+            _authorsHelper = authorsHelper;
+            _appDbContext = appDbContext;
+        }
+
         public Task<List<GetAuthorDTO>> Handle(GetMediatRAuthorsQuery request, CancellationToken cancellationToken)
         { 
             var authors = _appDbContext.Authors.Include("Books")

@@ -4,5 +4,6 @@
     {
         public int FkAuthor { get; set; }
         public Author Author { get; set; }
+
     }
 }

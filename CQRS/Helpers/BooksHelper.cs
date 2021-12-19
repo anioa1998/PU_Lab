@@ -15,7 +15,7 @@ namespace CQRS.Helpers
             var averageRate = Math.Round(book.Rates.Average(b => b.Value), 1);
 
             book.Authors.ForEach(a => authorsDtos.Add(new AuthorInGetBookDTO(a.Id, a.FirstName, a.SecondName)));
-            return new GetBookDTO(book.Id, book.Title, book.ReleaseDate, averageRate, rateCount, authorsDtos);
+            return new GetBookDTO(book.Id, book.Title, book.ReleaseDate, book.Description, averageRate, rateCount, authorsDtos);
         }
     }
 }
