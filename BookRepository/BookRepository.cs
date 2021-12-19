@@ -115,12 +115,23 @@ namespace RepositoryPattern
             return new GetBookDTO(book.Id, book.Title, book.ReleaseDate, book.Description, averageRate, rateCount, authorsDtos);
         }
 
+        private GetAuthorDTO ExtractAuthorDTO(Author author)
+        {
+            var authorsDtos = new List<BookInGetAuthorDTO>();
+            var rateCount = author.Rates.Count();
+            var averageRate = author.Rates.Count > 0 ? Math.Round(author.Rates.Average(b => b.Value), 1) : 0;
+
+            author.Books.ForEach(a => authorsDtos.Add(new BookInGetAuthorDTO(a.Id, a.Title)));
+            return new GetAuthorDTO(author.Id, author.FirstName, author.SecondName, author.Cv, averageRate, rateCount, authorsDtos);
+        }
         public void StartupCreateIndex()
         {
             _elasticHelper.CreateIndex();
             CleanUpDatabase();
             GenerateAuthors();
+            AddAuthorsToElastic();
             GenerateBooks();
+            AddBooksToElastic();
         }
 
         private void CleanUpDatabase()
@@ -147,6 +158,7 @@ namespace RepositoryPattern
 
             _appDbContext.Authors.AddRange(authors);
             _appDbContext.SaveChanges();
+
             var authorsWithIds = _appDbContext.Authors.ToList();
 
             foreach (var author in authorsWithIds)
@@ -159,6 +171,30 @@ namespace RepositoryPattern
 
             _appDbContext.AuthorRate.AddRange(authorRates);
             _appDbContext.SaveChanges();
+        }
+
+        private void AddAuthorsToElastic()
+        {
+            var authors = _appDbContext.Authors.Include("Books")
+                                               .Include("Rates")
+                                               .ToList();
+
+            foreach (var author in authors)
+            {
+                _elasticHelper.AddAuthorToElastic(ExtractAuthorDTO(author));
+            }
+        }
+
+        private void AddBooksToElastic()
+        {
+            var books = _appDbContext.Books.Include("Authors")
+                                            .Include("Rates")
+                                            .ToList();
+
+            foreach (var book in books)
+            {
+                _elasticHelper.AddBookToElastic(ExtractBookDTO(book));
+            }
         }
 
         private void GenerateBooks()
