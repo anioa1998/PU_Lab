@@ -27,8 +27,8 @@ namespace RepositoryPattern
             _elasticHelper.CreateIndex();
             CleanUpDatabase();
             GenerateAuthors();
-            AddAuthorsToElastic();
             GenerateBooks();
+            AddAuthorsToElastic();
             AddBooksToElastic();
         }
 

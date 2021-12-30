@@ -41,7 +41,17 @@ namespace RepositoryPattern.Helpers
             }
         }
 
-        public IEnumerable<GetAuthorDTO> GetAuthor(int id = 0, PaginationDTO pagination = null)
+        public bool DeleteAuthorFromElastic(int id)
+        {
+            return _elasticClient.Delete<GetAuthorDTO>(id).Result == Result.Deleted;
+        }
+
+        public bool DeleteBookFromElastic(int id)
+        {
+            return _elasticClient.Delete<GetBookDTO>(id).Result == Result.Deleted;
+        }
+
+        public IEnumerable<GetAuthorDTO> GetAuthorFromElastic(int id = 0, PaginationDTO pagination = null)
         {
             if (id > 0)
             {
@@ -60,7 +70,7 @@ namespace RepositoryPattern.Helpers
             }
         }
 
-        public IEnumerable<GetBookDTO> GetBook(int id = 0, PaginationDTO pagination = null)
+        public IEnumerable<GetBookDTO> GetBookFromElastic(int id = 0, PaginationDTO pagination = null)
         {
 
             if (id > 0)
@@ -78,6 +88,17 @@ namespace RepositoryPattern.Helpers
                 return _elasticClient.Search<GetBookDTO>(searchRequest).Documents;
 
             }
+        }
+
+        public bool UpdateAuthorRateInElastic(int id, double averageRate, int count)
+        {
+
+            return _elasticClient.Update<GetAuthorDTO>(id, u => u.Index("get_author").Doc(new GetAuthorDTO(id, averageRate, count))).Result == Result.Updated;
+        }
+
+        public bool UpdateBookRateInElastic(int id, double averageRate, int count)
+        {
+            return _elasticClient.Update<GetBookDTO>(id, u => u.Index("get_book").Doc(new GetBookDTO(id, averageRate, count))).Result == Result.Updated;
         }
     }
 }

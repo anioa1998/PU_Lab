@@ -23,13 +23,13 @@ namespace RepositoryPattern
 
         public List<GetBookDTO> GetBooks(PaginationDTO pagination)
         {
-            return _elasticHelper.GetBook(pagination: pagination)
+            return _elasticHelper.GetBookFromElastic(pagination: pagination)
                                  .ToList();
         }
 
         public GetBookDTO GetBook(int id)
         {
-            return _elasticHelper.GetBook(id)
+            return _elasticHelper.GetBookFromElastic(id)
                                  .Single();
         }
 
@@ -72,6 +72,7 @@ namespace RepositoryPattern
                 _appDbContext.BookRates.RemoveRange(bookRates);
                 _appDbContext.Books.Remove(book);
                 _appDbContext.SaveChanges();
+                _elasticHelper.DeleteBookFromElastic(id);
                 return true;
             }
             catch (Exception ex)
@@ -88,6 +89,12 @@ namespace RepositoryPattern
                 var newRate = new BookRate() { Type = RateType.BookRate, Book = book, Date = DateTime.Now, FkBook = id, Value = rate };
                 _appDbContext.BookRates.Add(newRate);
                 _appDbContext.SaveChanges();
+
+                var rateCount = book.Rates.Count();
+                var averageRate = book.Rates.Count > 0 ? Math.Round(book.Rates.Average(b => b.Value), 1) : 0;
+                
+                if (!_elasticHelper.UpdateBookRateInElastic(id, averageRate, rateCount))
+                    return false;
                 return true;
             }
             catch

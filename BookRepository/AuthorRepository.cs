@@ -44,10 +44,18 @@ namespace RepositoryPattern
         {
             try
             {
-                var author = _appDbContext.Authors.Find(id);
+                var author = _appDbContext.Authors.Include("Rates")
+                                                  .Single(a => a.Id == id);
                 var newRate = new AuthorRate() { Type = RateType.AuthorRate, Author = author, Date = DateTime.Now, FkAuthor = id, Value = rate };
                 _appDbContext.AuthorRate.Add(newRate);
                 _appDbContext.SaveChanges();
+
+                var rateCount = author.Rates.Count();
+                var averageRate = author.Rates.Count > 0 ? Math.Round(author.Rates.Average(b => b.Value), 1) : 0;
+               
+                if (!_elasticHelper.UpdateAuthorRateInElastic(id, averageRate, rateCount))
+                    return false;
+
                 return true;
             }
             catch
@@ -65,6 +73,7 @@ namespace RepositoryPattern
                 _appDbContext.AuthorRate.RemoveRange(authorRates);
                 _appDbContext.Authors.Remove(author);
                 _appDbContext.SaveChanges();
+                _elasticHelper.DeleteAuthorFromElastic(id);
                 return true;
             }
             catch (Exception ex)
@@ -75,7 +84,7 @@ namespace RepositoryPattern
 
         public List<GetAuthorDTO> GetAuthors(PaginationDTO pagination)
         {
-            return _elasticHelper.GetAuthor(pagination: pagination).ToList();
+            return _elasticHelper.GetAuthorFromElastic(pagination: pagination).ToList();
         }
 
   

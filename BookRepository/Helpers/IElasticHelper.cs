@@ -11,7 +11,11 @@ namespace RepositoryPattern.Helpers
         void CreateIndex();
         GetBookDTO AddBookToElastic(GetBookDTO book);
         GetAuthorDTO AddAuthorToElastic(GetAuthorDTO author);
-        IEnumerable<GetBookDTO> GetBook(int id = 0, PaginationDTO pagination = null);
-        IEnumerable<GetAuthorDTO> GetAuthor(int id = 0, PaginationDTO pagination= null);
+        IEnumerable<GetBookDTO> GetBookFromElastic(int id = 0, PaginationDTO pagination = null);
+        IEnumerable<GetAuthorDTO> GetAuthorFromElastic(int id = 0, PaginationDTO pagination = null);
+        bool DeleteBookFromElastic(int id);
+        bool DeleteAuthorFromElastic(int id);
+        bool UpdateBookRateInElastic(int id, double averageRate, int count);
+        bool UpdateAuthorRateInElastic(int id, double averageRate, int count);
     }
 }
