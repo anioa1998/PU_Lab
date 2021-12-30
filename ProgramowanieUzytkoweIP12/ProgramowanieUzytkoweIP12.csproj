@@ -20,8 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookRepository\RepositoryPattern.csproj" />
-    <ProjectReference Include="..\CQRS\CQRS.csproj" />
-    <ProjectReference Include="..\MediatRProject\MediatRProject.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
 
