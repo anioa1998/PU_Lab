@@ -39,6 +39,8 @@ namespace ProgramowanieUzytkoweIP12
 
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IStartRepository, StartRepository>();
+            services.AddScoped<IMappingHelper, MappingHelper>();
             services.AddScoped<IElasticHelper, ElasticHelper>();
 
            

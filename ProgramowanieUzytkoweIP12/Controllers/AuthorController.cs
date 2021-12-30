@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 namespace ProgramowanieUzytkoweIP12.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class AuthorController : Controller
     {
         private readonly IAuthorRepository _authorRepository;
@@ -15,13 +17,13 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             _authorRepository = authorRepository;
         }
 
-        [HttpGet("GetAuthors")]
+        [HttpGet]
         public ActionResult<IEnumerable<GetAuthorDTO>> GetAuthors([FromQuery] PaginationDTO pagination)
         {
             return _authorRepository.GetAuthors(pagination);
         }
 
-        [HttpPost("AddAuthor")]
+        [HttpPost]
         public ActionResult AddAuthor(AddAuthorDTO author)
         {
             var result = _authorRepository.AddAuthor(author);
@@ -34,8 +36,8 @@ namespace ProgramowanieUzytkoweIP12.Controllers
                 return BadRequest("Unable to add new author. Try again.");
             }
         }
-        [HttpDelete("DeleteAuthor/{id}")]
-        public ActionResult DeleteAuthor(int id)
+        [HttpDelete]
+        public ActionResult DeleteAuthor([FromQuery]int id)
         {
             var result = _authorRepository.DeleteAuthor(id);
             if (result)
@@ -47,7 +49,7 @@ namespace ProgramowanieUzytkoweIP12.Controllers
                 return BadRequest();
             }
         }
-        [HttpPost("AddRate")]
+        [HttpPost("Rate")]
         public ActionResult AddRate([FromQuery] int id, [FromQuery] short rate)
         {
             var result = _authorRepository.AddRate(id, rate);

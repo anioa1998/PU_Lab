@@ -30,19 +30,54 @@ namespace RepositoryPattern.Helpers
 
         public void CreateIndex()
         {
-            if(_elasticClient.Indices.Exists("index_books").Exists)
+            if(_elasticClient.Indices.Exists("get_book").Exists)
             {
-               _elasticClient.Indices.Delete("index_books");
+               _elasticClient.Indices.Delete("get_book");
             }
 
-            if(_elasticClient.Indices.Exists("index_authors").Exists)
+            if (_elasticClient.Indices.Exists("get_author").Exists)
             {
-                _elasticClient.Indices.Delete("index_authors");
+                _elasticClient.Indices.Delete("get_author");
             }
+        }
 
-            _elasticClient.Indices.Create("index_books", index => index.Map<GetBookDTO>(x => x.AutoMap()));
-            _elasticClient.Indices.Create("index_authors", index => index.Map<GetAuthorDTO>(x => x.AutoMap()));
+        public IEnumerable<GetAuthorDTO> GetAuthor(int id = 0, PaginationDTO pagination = null)
+        {
+            if (id > 0)
+            {
+                return new List<GetAuthorDTO>() { _elasticClient.Get<GetAuthorDTO>(id).Source };
+            }
+            else
+            {
+                var searchRequest = new SearchRequest<GetAuthorDTO>
+                {
+                    From = pagination.Count * pagination.Page,
+                    Size = pagination.Count,
+                    Query = new MatchAllQuery()
+                };
+                return _elasticClient.Search<GetAuthorDTO>(searchRequest).Documents;
+               
+            }
+        }
 
+        public IEnumerable<GetBookDTO> GetBook(int id = 0, PaginationDTO pagination = null)
+        {
+
+            if (id > 0)
+            {
+                return new List<GetBookDTO>() { _elasticClient.Get<GetBookDTO>(id).Source };
+            }
+            else
+            {
+                var searchRequest = new SearchRequest<GetBookDTO>
+                {
+                    From = pagination.Count * pagination.Page,
+                    Size = pagination.Count,
+                    Query = new MatchAllQuery()
+                };
+                return _elasticClient.Search<GetBookDTO>(searchRequest).Documents;
+
+            }
         }
     }
 }

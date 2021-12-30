@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Model.DTOs;
 using Model.Models;
+using RepositoryPattern.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,20 +13,25 @@ namespace RepositoryPattern
     public class AuthorRepository : IAuthorRepository
     {
         private readonly AppDbContext _appDbContext;
+        private readonly IMappingHelper _mappingHelper;
+        private readonly IElasticHelper _elasticHelper;
 
-        public AuthorRepository(AppDbContext appDbContext)
+        public AuthorRepository(AppDbContext appDbContext, IMappingHelper mappingHelper, IElasticHelper elasticHelper)
         {
             _appDbContext = appDbContext;
+            _mappingHelper = mappingHelper;
+            _elasticHelper = elasticHelper;
         }
 
         public bool AddAuthor(AddAuthorDTO authorDTO)
         {
-            var newAuthor = new Author(authorDTO.FirstName, authorDTO.SecondName, RandomString(1000));
+            var newAuthor = new Author(authorDTO.FirstName, authorDTO.SecondName, _mappingHelper.RandomString(1000));
 
             try
             {
                 _appDbContext.Authors.Add(newAuthor);
                 _appDbContext.SaveChanges();
+                _elasticHelper.AddAuthorToElastic(_mappingHelper.ExtractAuthorDTO(newAuthor));
                 return true;
             }
             catch
@@ -69,37 +75,9 @@ namespace RepositoryPattern
 
         public List<GetAuthorDTO> GetAuthors(PaginationDTO pagination)
         {
-            var authors = _appDbContext.Authors.Include("Books")
-                                               .Include("Rates")
-                                               .Skip(pagination.Page * pagination.Count)
-                                               .Take(pagination.Count)
-                                               .ToList();
-
-            var authorDtoList = new List<GetAuthorDTO>();
-            foreach (var author in authors)
-            {
-                authorDtoList.Add(ExtractAuthorDTO(author));
-            }
-
-            return authorDtoList;
+            return _elasticHelper.GetAuthor(pagination: pagination).ToList();
         }
 
-        private GetAuthorDTO ExtractAuthorDTO(Author author)
-        {
-            var authorsDtos = new List<BookInGetAuthorDTO>();
-            var rateCount = author.Rates.Count();
-            var averageRate = author.Rates.Count > 0 ? Math.Round(author.Rates.Average(b => b.Value), 1) : 0;
-            
-            author.Books.ForEach(a => authorsDtos.Add(new BookInGetAuthorDTO(a.Id, a.Title)));
-            return new GetAuthorDTO(author.Id, author.FirstName, author.SecondName, author.Cv, averageRate, rateCount, authorsDtos);
-        }
-
-        public string RandomString(int length)
-        {
-            Random random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
+  
     }
 }

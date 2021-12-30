@@ -18,18 +18,18 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             _bookRepository = bookRepository;
         }
 
-        [HttpGet("GetBooks")]
+        [HttpGet("All")]
         public ActionResult<IEnumerable<GetBookDTO>> GetBooks([FromQuery] PaginationDTO pagination)
         {
             return _bookRepository.GetBooks(pagination);
         }
 
-        [HttpGet("GetBook")]
+        [HttpGet]
         public ActionResult<GetBookDTO> GetBook([FromQuery] int id)
         {
             return _bookRepository.GetBook(id);
         }
-        [HttpPost("AddBook")]
+        [HttpPost]
         public ActionResult AddBook([FromBody] AddBookDTO book)
         {
 
@@ -44,7 +44,7 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             }
 
         }
-        [HttpDelete("DeleteBook")]
+        [HttpDelete]
         public ActionResult DeleteBook([FromQuery] int id)
         {
             var result = _bookRepository.DeleteBook(id);
@@ -57,7 +57,7 @@ namespace ProgramowanieUzytkoweIP12.Controllers
                 return BadRequest();
             }
         }
-        [HttpPost("AddRate")]
+        [HttpPost("Rate")]
         public ActionResult AddRate([FromQuery] int id, [FromQuery] short rate)
         {
             var result = _bookRepository.RateBook(id, rate);
@@ -71,19 +71,7 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             }
         }
 
-        [HttpGet("CreateIndex")]
-        public ActionResult CreateIndex()
-        {
-            try
-            {
-                _bookRepository.StartupCreateIndex();
-                return Ok();
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+       
 
 
     }

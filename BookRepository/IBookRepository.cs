@@ -11,6 +11,6 @@ namespace RepositoryPattern
         bool AddBook(AddBookDTO bookDto);
         bool DeleteBook(int id);
         bool RateBook(int id, short rate);
-        void StartupCreateIndex();
+
     }
 }
