@@ -82,6 +82,12 @@ namespace RepositoryPattern
             }
         }
 
+        public GetAuthorDTO GetAuthor(int id)
+        {
+            return _elasticHelper.GetAuthorFromElastic(id)
+                                 .Single();
+        }
+
         public List<GetAuthorDTO> GetAuthors(PaginationDTO pagination)
         {
             return _elasticHelper.GetAuthorFromElastic(pagination: pagination).ToList();

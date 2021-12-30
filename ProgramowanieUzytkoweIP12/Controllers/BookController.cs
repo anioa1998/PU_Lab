@@ -25,9 +25,9 @@ namespace ProgramowanieUzytkoweIP12.Controllers
         }
 
         [HttpGet]
-        public ActionResult<GetBookDTO> GetBook([FromQuery] int id)
+        public ActionResult<GetBookDTO> GetBook([FromQuery] SearchBookDTO book)
         {
-            return _bookRepository.GetBook(id);
+            return _bookRepository.GetBook(book.Id);
         }
         [HttpPost]
         public ActionResult AddBook([FromBody] AddBookDTO book)

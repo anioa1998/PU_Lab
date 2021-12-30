@@ -17,10 +17,15 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             _authorRepository = authorRepository;
         }
 
-        [HttpGet]
+        [HttpGet("All")]
         public ActionResult<IEnumerable<GetAuthorDTO>> GetAuthors([FromQuery] PaginationDTO pagination)
         {
             return _authorRepository.GetAuthors(pagination);
+        }
+        [HttpGet]
+        public ActionResult<GetAuthorDTO> GetAuthor([FromQuery] SearchAuthorDTO author)
+        {
+            return _authorRepository.GetAuthor(author.Id);
         }
 
         [HttpPost]

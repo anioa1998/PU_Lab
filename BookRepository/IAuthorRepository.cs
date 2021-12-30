@@ -10,6 +10,7 @@ namespace RepositoryPattern
     public interface IAuthorRepository
     {
         public List<GetAuthorDTO> GetAuthors(PaginationDTO pagination);
+        public GetAuthorDTO GetAuthor(int id);
         public bool AddAuthor(AddAuthorDTO authorDTO);
         public bool DeleteAuthor(int id);
         public bool AddRate(int id, short rate);
