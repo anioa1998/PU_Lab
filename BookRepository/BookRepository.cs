@@ -27,10 +27,17 @@ namespace RepositoryPattern
                                  .ToList();
         }
 
+        public List<GetBookDTO> SearchBooks(SearchBookDTO searchBook)
+        {
+            return _elasticHelper.GetBookFromElastic(searchBook: searchBook)
+                                 .ToList();
+                                 
+        }
+
         public GetBookDTO GetBook(int id)
         {
             return _elasticHelper.GetBookFromElastic(id)
-                                 .Single();
+                                .Single();
         }
 
         public bool AddBook(AddBookDTO bookDto)

@@ -24,10 +24,16 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             return _bookRepository.GetBooks(pagination);
         }
 
-        [HttpGet]
-        public ActionResult<GetBookDTO> GetBook([FromQuery] SearchBookDTO book)
+        [HttpGet("{id}")]
+        public ActionResult<GetBookDTO> GetBook([FromRoute] int id)
         {
-            return _bookRepository.GetBook(book.Id);
+            return _bookRepository.GetBook(id);
+        }
+
+        [HttpGet("Search")]
+        public ActionResult<List<GetBookDTO>> SearchBooks([FromQuery] SearchBookDTO searchBook)
+        {
+            return _bookRepository.SearchBooks(searchBook);
         }
         [HttpPost]
         public ActionResult AddBook([FromBody] AddBookDTO book)
@@ -44,8 +50,8 @@ namespace ProgramowanieUzytkoweIP12.Controllers
             }
 
         }
-        [HttpDelete]
-        public ActionResult DeleteBook([FromQuery] int id)
+        [HttpDelete("{id}")]
+        public ActionResult DeleteBook([FromRoute] int id)
         {
             var result = _bookRepository.DeleteBook(id);
             if (result)
@@ -57,8 +63,8 @@ namespace ProgramowanieUzytkoweIP12.Controllers
                 return BadRequest();
             }
         }
-        [HttpPost("Rate")]
-        public ActionResult AddRate([FromQuery] int id, [FromQuery] short rate)
+        [HttpPost("{id}/Rate")]
+        public ActionResult AddRate([FromRoute] int id, [FromQuery] short rate)
         {
             var result = _bookRepository.RateBook(id, rate);
             if (result)

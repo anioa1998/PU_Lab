@@ -9,11 +9,7 @@ namespace Model.DTOs
 {
     public class SearchBookDTO
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        [MaxLength(1000)]
-        public string Description { get; set; }
-        public string FirstName { get; set; }
-        public string SecondName { get; set; }
+        public string MasterQuery { get; set; }
+        public bool MatchAll { get; set; }
     }
 }

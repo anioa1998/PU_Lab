@@ -22,10 +22,16 @@ namespace ProgramowanieUzytkoweIP12.Controllers
         {
             return _authorRepository.GetAuthors(pagination);
         }
-        [HttpGet]
-        public ActionResult<GetAuthorDTO> GetAuthor([FromQuery] SearchAuthorDTO author)
+        [HttpGet("{id}")]
+        public ActionResult<GetAuthorDTO> GetAuthor([FromRoute]int id)
         {
-            return _authorRepository.GetAuthor(author.Id);
+            return _authorRepository.GetAuthor(id);
+        }
+
+        [HttpGet("Search")]
+        public ActionResult<IEnumerable<GetAuthorDTO>> SearchAuthors([FromQuery] SearchAuthorDTO searchAuthor)
+        {
+            return _authorRepository.SearchAuthors(searchAuthor);
         }
 
         [HttpPost]
@@ -41,8 +47,8 @@ namespace ProgramowanieUzytkoweIP12.Controllers
                 return BadRequest("Unable to add new author. Try again.");
             }
         }
-        [HttpDelete]
-        public ActionResult DeleteAuthor([FromQuery]int id)
+        [HttpDelete("{id}")]
+        public ActionResult DeleteAuthor([FromRoute]int id)
         {
             var result = _authorRepository.DeleteAuthor(id);
             if (result)
@@ -54,8 +60,8 @@ namespace ProgramowanieUzytkoweIP12.Controllers
                 return BadRequest();
             }
         }
-        [HttpPost("Rate")]
-        public ActionResult AddRate([FromQuery] int id, [FromQuery] short rate)
+        [HttpPost("{id}/Rate")]
+        public ActionResult AddRate([FromRoute] int id, [FromQuery] short rate)
         {
             var result = _authorRepository.AddRate(id, rate);
             if (result)

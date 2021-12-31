@@ -1,9 +1,7 @@
 ﻿using Model.DTOs;
 using Nest;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace RepositoryPattern.Helpers
 {
@@ -30,9 +28,9 @@ namespace RepositoryPattern.Helpers
 
         public void CreateIndex()
         {
-            if(_elasticClient.Indices.Exists("get_book").Exists)
+            if (_elasticClient.Indices.Exists("get_book").Exists)
             {
-               _elasticClient.Indices.Delete("get_book");
+                _elasticClient.Indices.Delete("get_book");
             }
 
             if (_elasticClient.Indices.Exists("get_author").Exists)
@@ -51,13 +49,9 @@ namespace RepositoryPattern.Helpers
             return _elasticClient.Delete<GetBookDTO>(id).Result == Result.Deleted;
         }
 
-        public IEnumerable<GetAuthorDTO> GetAuthorFromElastic(int id = 0, PaginationDTO pagination = null)
+        public IEnumerable<GetAuthorDTO> GetAuthorFromElastic(int id = 0, SearchAuthorDTO searchAuthor = null, PaginationDTO pagination = null)
         {
-            if (id > 0)
-            {
-                return new List<GetAuthorDTO>() { _elasticClient.Get<GetAuthorDTO>(id).Source };
-            }
-            else
+            if (searchAuthor == null && id <= 0)
             {
                 var searchRequest = new SearchRequest<GetAuthorDTO>
                 {
@@ -66,18 +60,32 @@ namespace RepositoryPattern.Helpers
                     Query = new MatchAllQuery()
                 };
                 return _elasticClient.Search<GetAuthorDTO>(searchRequest).Documents;
-               
             }
-        }
-
-        public IEnumerable<GetBookDTO> GetBookFromElastic(int id = 0, PaginationDTO pagination = null)
-        {
 
             if (id > 0)
             {
-                return new List<GetBookDTO>() { _elasticClient.Get<GetBookDTO>(id).Source };
+                return new List<GetAuthorDTO>() { _elasticClient.Get<GetAuthorDTO>(id).Source };
             }
-            else
+
+            var query = searchAuthor.MatchAll ? $"\"{searchAuthor.MasterQuery}\"" : $"*{searchAuthor.MasterQuery}*";
+
+            var searchResult = _elasticClient.Search<GetAuthorDTO>(s => s.Query(
+                                                                 q => q.MultiMatch(
+                                                                 mm => mm.Fields(
+                                                                 fs => fs.Field(f => f.FirstName, 10.0)
+                                                                 .Field(f => f.SecondName, 7.0)
+                                                                 .Field(f => f.CV, 5.0)
+                                                                 .Field(f => f.Books.Select(a => a.Title), 3.0))
+                                                                 .Fuzziness(Fuzziness.Auto)
+                                                                 .Query(query))));
+            return searchResult.Documents;
+
+        }
+
+        public IEnumerable<GetBookDTO> GetBookFromElastic(int id = 0, SearchBookDTO searchBook = null, PaginationDTO pagination = null)
+        {
+
+            if (searchBook == null && id <= 0)
             {
                 var searchRequest = new SearchRequest<GetBookDTO>
                 {
@@ -86,8 +94,25 @@ namespace RepositoryPattern.Helpers
                     Query = new MatchAllQuery()
                 };
                 return _elasticClient.Search<GetBookDTO>(searchRequest).Documents;
-
             }
+
+            if (id > 0)
+            {
+                return new List<GetBookDTO>() { _elasticClient.Get<GetBookDTO>(id).Source };
+            }
+
+            var query = searchBook.MatchAll ? $"\"{searchBook.MasterQuery}\"" : $"*{searchBook.MasterQuery}*";
+
+            var searchResult = _elasticClient.Search<GetBookDTO>(s => s.Query(
+                                                                 q => q.MultiMatch(
+                                                                 mm => mm.Fields(
+                                                                 fs => fs.Field(f => f.Title, 10.0)
+                                                                 .Field(f => f.Description, 7.0)
+                                                                 .Field(f => f.Authors.Select(a => a.FirstName), 5.0)
+                                                                 .Field(f => f.Authors.Select(a => a.SecondName), 3.0))
+                                                                 .Fuzziness(Fuzziness.Auto)
+                                                                 .Query(query))));
+            return searchResult.Documents;
         }
 
         public bool UpdateAuthorRateInElastic(int id, double averageRate, int count)
@@ -100,5 +125,6 @@ namespace RepositoryPattern.Helpers
         {
             return _elasticClient.Update<GetBookDTO>(id, u => u.Index("get_book").Doc(new GetBookDTO(id, averageRate, count))).Result == Result.Updated;
         }
+
     }
 }

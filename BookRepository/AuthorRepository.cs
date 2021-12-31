@@ -92,7 +92,10 @@ namespace RepositoryPattern
         {
             return _elasticHelper.GetAuthorFromElastic(pagination: pagination).ToList();
         }
+        public List<GetAuthorDTO> SearchAuthors(SearchAuthorDTO searchAuthor)
+        {
+            return _elasticHelper.GetAuthorFromElastic(searchAuthor: searchAuthor).ToList();
+        }
 
-  
     }
 }
