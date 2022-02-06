@@ -104,21 +104,26 @@ namespace RepositoryPattern
         {
             try
             {
-                var authorModel = _appDbContext.Authors.Find(authorDTO.Id);
+                var authorModel = _appDbContext.Authors.Include(x => x.Books)
+                                                        .FirstOrDefault(x => x.Id == authorDTO.Id);
+
+                var booksToRemove = authorModel.Books.Where(a => !authorDTO.Books.Exists(e => e.Id == a.Id)).ToList();
+                var booksToAdd = authorDTO.Books.Where(e => !authorModel.Books.Exists(a => a.Id == e.Id)).ToList();
+
+                booksToRemove.ForEach(a => authorModel.Books.Remove(a));
+                booksToAdd.ForEach(a => authorModel.Books.Add(_appDbContext.Books.Find(a.Id)));
 
                 authorModel.FirstName = authorDTO.FirstName;
                 authorModel.SecondName = authorDTO.SecondName;
-                authorModel.Books = _appDbContext.Books.Where(a => authorDTO.Books.Exists(g => g.Id == a.Id)).ToList();
 
-                _appDbContext.Authors.Update(authorModel);
                 _appDbContext.SaveChanges();
                 _elasticHelper.UpdateAuthorInElastic(authorDTO);
 
-                foreach (var bookModel in authorModel.Books)
-                {
-                    var bookDTO = _mappingHelper.ExtractBookDTO(bookModel);
-                    _elasticHelper.UpdateBookInElastic(bookDTO);
-                }
+                var bookElasticUpdate = new List<GetBookDTO>();
+
+                booksToAdd.ForEach(a => bookElasticUpdate.Add(_mappingHelper.ExtractBookDTO(_appDbContext.Books.Include("Rates").Single(x => x.Id == a.Id))));
+                booksToRemove.ForEach(a => bookElasticUpdate.Add(_mappingHelper.ExtractBookDTO(_appDbContext.Books.Include("Rates").Single(x => x.Id == a.Id))));
+                bookElasticUpdate.ForEach(a => _elasticHelper.UpdateBookInElastic(a));
                 return true;
             }
             catch

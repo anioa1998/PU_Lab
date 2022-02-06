@@ -32,21 +32,11 @@
         }
     </tbody>
 </table>
-<div class="pagination">
-    <a href="#">&laquo;</a>
-    <a href="#">1</a>
-    <a href="#">2</a>
-    <a href="#">3</a>
-    <a href="#">4</a>
-    <a href="#">5</a>
-    <a href="#">6</a>
-    <a href="#">&raquo;</a>
-</div>
 
 @code
 {
     private List<GetBookDTO> books;
-    private PaginationDTO pagination = new PaginationDTO(0, 10);
+    private PaginationDTO pagination = new PaginationDTO(0, 40);
 
     protected override async Task OnInitializedAsync()
     {

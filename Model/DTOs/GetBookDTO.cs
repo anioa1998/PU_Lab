@@ -17,6 +17,7 @@ namespace Model.DTOs
         public int RatesCount { get; set; }
         public List<AuthorInGetBookDTO> Authors { get; set; }
 
+        public GetBookDTO() { }
         public GetBookDTO(int id, double averageRate, int ratesCount)
         {
             Id = id;

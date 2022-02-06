@@ -1,4 +1,5 @@
-﻿using Model.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
+using Model.DTOs;
 using Model.Models;
 using RepositoryPattern.Helpers;
 using System;
@@ -114,25 +115,32 @@ namespace RepositoryPattern
         {
             try
             {
-                var bookModel = _appDbContext.Books.Find(bookDTO.Id);
+                var bookModel = _appDbContext.Books.Include(x => x.Authors)
+                                                    .FirstOrDefault(x => x.Id == bookDTO.Id);
+ 
+                var authorsToRemove = bookModel.Authors.Where(a => !bookDTO.Authors.Exists(e => e.Id == a.Id)).ToList();
+                var authorsToAdd = bookDTO.Authors.Where(e => !bookModel.Authors.Exists(a => a.Id == e.Id)).ToList();
+
+                authorsToRemove.ForEach(a => bookModel.Authors.Remove(a));
+                authorsToAdd.ForEach(a => bookModel.Authors.Add(_appDbContext.Authors.Find(a.Id)));
 
                 bookModel.Title = bookDTO.Title;
                 bookModel.ReleaseDate = bookDTO.ReleaseDate;
-                bookModel.Authors = _appDbContext.Authors.Where(a => bookDTO.Authors.Exists(g => g.Id == a.Id)).ToList();
 
-                _appDbContext.Books.Update(bookModel);
                 _appDbContext.SaveChanges();
                 _elasticHelper.UpdateBookInElastic(bookDTO);
 
-                foreach (var authorModel in bookModel.Authors)
-                {
-                    var authorDTO = _mappingHelper.ExtractAuthorDTO(authorModel);
-                    _elasticHelper.UpdateAuthorInElastic(authorDTO);
-                }
+                var authorElasticUpdate = new List<GetAuthorDTO>();
+
+                authorsToAdd.ForEach(a => authorElasticUpdate.Add(_mappingHelper.ExtractAuthorDTO(_appDbContext.Authors.Include("Rates").Single(x => x.Id == a.Id)))); 
+                authorsToRemove.ForEach(a => authorElasticUpdate.Add(_mappingHelper.ExtractAuthorDTO(_appDbContext.Authors.Include("Rates").Single(x => x.Id == a.Id))));
+                authorElasticUpdate.ForEach(a => _elasticHelper.UpdateAuthorInElastic(a));
+
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
+                var t = ex.Message;
                 return false;
             }
         }

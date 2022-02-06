@@ -6,18 +6,27 @@
 
 @inject IBookRepository _bookRepository
 @inject IAuthorRepository _authorRepository
-@inject IMappingHelper _mappingHelper 
+@inject IMappingHelper _mappingHelper
+@inject NavigationManager _navManager
 
 @if (Option == "books")
 {
-    <header class="h1">Add/Edit Book</header>
+    <header>
+        <h1>Add/Edit book</h1>
+        <button type="button" class="btn btn-success" @onclick="() => SaveBook()">Save</button>
+        <button type="button" class="btn btn-danger" @onclick="() => Cancel()">Cancel</button>
+    </header>
+    @if (errorMessage)
+    {
+        <h5 class="text-center" style="color:red">Check your data. Try again!</h5>
+    }
+
     <div class="simple-form">
         <div class="form-group">
-            <label for="title">Title</label>
+            <label for="title" class="font-weight-bold">Title</label>
             <input type="text" class="form-control" id="title" @bind-value="@bookDTO.Title"><br />
-            <label for="releasedate">Release Date</label>
+            <label for="releasedate" class="font-weight-bold">Release Date</label>
             <input type="date" class="form-control" id="releasedate" @bind-value="@bookDTO.ReleaseDate">
-
 
             <table class="table">
                 <thead>
@@ -25,20 +34,14 @@
                         <th><label for="availableauthors">Available authors</label></th>
                         <th>
                             <select class="form-control selectpicker" id="availableauthors" @bind="@selectedAuthorId">
+                                <option value="0" selected disabled hidden>Select person to add</option>
                                 @foreach (var item in availableAuthors)
                                 {
-                                    if (availableAuthors.IndexOf(item) == 0)
-                                    {
-                                        <option value="@item.Id" selected="selected">@item.FirstName @item.SecondName</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@item.Id">@item.FirstName @item.SecondName</option>
-                                    }
+                                    <option value="@item.Id">@item.FirstName @item.SecondName</option>
                                 }
                             </select>
                         </th>
-                        <th><button type="button" class="btn btn-success" @onclick="() => AddAuthor(selectedAuthorId)">Add author</button></th>
+                        <th><button type="button" class="btn btn-success" @onclick="() => AddAuthorToBook(selectedAuthorId)">Add author</button></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,81 +50,200 @@
                         <tr>
                             <td>@addedAuthor.FirstName</td>
                             <td>@addedAuthor.SecondName</td>
-                            <td><button class="btn btn-secondary oi oi-minus" type="button" @onclick="() => RemoveAuthor(addedAuthor)"></button></td>
+                            <td><button class="btn btn-secondary oi oi-minus" type="button" @onclick="() => RemoveAuthorFromBook(addedAuthor)"></button></td>
 
                         </tr>
                     }
                 </tbody>
             </table>
 
-            
         </div>
     </div>
+
 }
-    @if (Option == "authors")
+@if (Option == "authors")
+{
+    <header>
+        <h1>Add/Edit author</h1>
+        <button type="button" class="btn btn-success" @onclick="() => SaveAuthor()">Save</button>
+        <button type="button" class="btn btn-danger" @onclick="() => Cancel()">Cancel</button>
+    </header>
+    @if (errorMessage)
     {
-        <p>bub 2</p>
+        <h5 class="text-center" style="color:red">Check your data. Try again!</h5>
     }
 
+    <div class="simple-form">
+        <div class="form-group">
+            <label for="name" class="font-weight-bold">Name</label>
+            <input type="text" class="form-control" id="name" @bind-value="@authorDTO.FirstName"><br />
+            <label for="surname" class="font-weight-bold">Surname</label>
+            <input type="text" class="form-control" id="surname" @bind-value="@authorDTO.SecondName">
+
+          
+
+        </div>
+    </div>
+
+}
 
 
-    @code {
-        [Parameter]
-        public int? Id { get; set; }
 
-        [Parameter]
-        public string Option { get; set; }
+@code {
+    [Parameter]
+    public int? Id { get; set; }
 
-        public GetBookDTO bookDTO { get; set; }
+    [Parameter]
+    public string Option { get; set; }
 
-        public List<GetAuthorDTO> availableAuthors { get; set; }
+    public GetBookDTO bookDTO { get; set; }
+    public GetAuthorDTO authorDTO { get; set; }
 
-        public List<GetAuthorDTO> bookAuthors { get; set; }
+    public List<GetAuthorDTO> availableAuthors { get; set; }
 
-        public int selectedAuthorId { get; set; }
+    public List<GetAuthorDTO> bookAuthors { get; set; }
 
-        protected override async Task OnInitializedAsync()
+
+    public int selectedAuthorId { get; set; }
+
+    public bool errorMessage { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected async Task LoadData()
+    {
+
+        if (Option == "books")
         {
-            await LoadData();
-        }
+            bookAuthors = new List<GetAuthorDTO>();
+            availableAuthors = _authorRepository.GetAuthors(new PaginationDTO(0, _authorRepository.CountAuthors()));
 
-        protected async Task LoadData()
-        {
-
-            if(Option == "books" && Id.HasValue)
+            if (Id.HasValue)
             {
-                bookAuthors = new List<GetAuthorDTO>();
-
                 bookDTO = _bookRepository.GetBook(Id.Value);
 
                 bookDTO.Authors.ForEach(b => bookAuthors.Add(_authorRepository.GetAuthor(b.Id)));
 
-                availableAuthors = _authorRepository.GetAuthors(new PaginationDTO(0, _authorRepository.CountAuthors()));
-                bookAuthors.ForEach(b => {
+
+                bookAuthors.ForEach(b =>
+                {
                     var auth = availableAuthors.Find(a => a.Id == b.Id);
                     availableAuthors.Remove(auth);
                 });
-
-                StateHasChanged();
             }
-
-            StateHasChanged();
+            else
+            {
+                bookDTO = new GetBookDTO() { Title = "", ReleaseDate = DateTime.Now };
+            }
         }
 
-        private void AddAuthor(int id)
+        if(Option == "authors")
+        {
+         
+            if (Id.HasValue)
+            {
+                authorDTO = _authorRepository.GetAuthor(Id.Value);
+
+            }
+            else
+            {
+                authorDTO = new GetAuthorDTO() { FirstName = "", SecondName = "" };
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private void AddAuthorToBook(int id)
+    {
+        errorMessage = false;
+        try
         {
             var author = availableAuthors.First(a => a.Id == id);
             bookAuthors.Add(author);
             availableAuthors.Remove(author);
-        }
-
-        private void RemoveAuthor(GetAuthorDTO author)
-        {
-            bookAuthors.Remove(author);
-            if (!availableAuthors.Contains(author))
-            {
-                availableAuthors.Add(author);
-            }
             StateHasChanged();
         }
+        catch
+        {
+            errorMessage = true;
+        }
+
     }
+
+    private void RemoveAuthorFromBook(GetAuthorDTO author)
+    {
+        bookAuthors.Remove(author);
+        if (!availableAuthors.Contains(author))
+        {
+            availableAuthors.Add(author);
+        }
+        StateHasChanged();
+    }
+
+    private void SaveBook()
+    {
+        var list = new List<AuthorInGetBookDTO>();
+        errorMessage = false;
+
+        bookAuthors.ForEach(b => list.Add(new AuthorInGetBookDTO(b.Id, b.FirstName, b.SecondName)));
+        bookDTO.Authors = list;
+
+        try
+        {
+            bool result;
+            if (Id.HasValue)
+            {
+                result = _bookRepository.UpdateBook(bookDTO);
+            }
+            else
+            {
+                result = _bookRepository.AddBook(new AddBookDTO(bookDTO.Title, bookDTO.ReleaseDate, "", bookDTO.Authors.Select(a => a.Id).ToList()));
+            }
+
+            if (!result) throw new Exception();
+
+            _navManager.NavigateTo($"/{Option}");
+        }
+        catch
+        {
+            errorMessage = true;
+        }
+    }
+    private void Cancel()
+    {
+        _navManager.NavigateTo($"/{Option}");
+    }
+
+
+    private void SaveAuthor()
+    {
+        errorMessage = false;
+
+        try
+        {
+            bool result;
+            if (Id.HasValue)
+            {
+                result = _authorRepository.UpdateAuthor(authorDTO);
+            }
+            else
+            {
+                result = _authorRepository.AddAuthor(new AddAuthorDTO(authorDTO.FirstName, authorDTO.SecondName, ""));
+            }
+
+            if (!result) throw new Exception();
+
+            _navManager.NavigateTo($"/{Option}");
+        }
+        catch
+        {
+            errorMessage = true;
+        }
+    }
+
+   
+}
