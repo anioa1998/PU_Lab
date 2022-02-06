@@ -26,6 +26,8 @@
             <td>@author.RatesCount</td>
             <td>@booksToAuthors[author.Id]</td>
             <td><button class="btn btn-secondary oi oi-pencil" type="button" @onclick="() => EditAuthor(author.Id)"></button></td>
+            <td><button class="btn btn-secondary oi oi-plus" type="button" @onclick="() => AddRate(author.Id)"></button></td>
+            <td><button class="btn btn-secondary oi oi-x" type="button" @onclick="() => RemoveAuthor(author.Id)"></button></td>
          </tr>
         }
     </tbody>
@@ -95,5 +97,16 @@
         {
             _navManager.NavigateTo($"/edit/authors");
         }
+    }
+
+    private void AddRate(int id)
+    {
+        _navManager.NavigateTo($"/rate/authors/{id}");
+    }
+
+    private void RemoveAuthor(int id)
+    {
+        _authorRepository.DeleteAuthor(id);
+        _navManager.NavigateTo("/authors");
     }
 }

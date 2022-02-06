@@ -87,13 +87,19 @@ namespace RepositoryPattern
 
         public GetAuthorDTO GetAuthor(int id)
         {
-            return _elasticHelper.GetAuthorFromElastic(id)
-                                 .Single();
+            //return _elasticHelper.GetAuthorFromElastic(id)
+            //                     .Single();
+            return _mappingHelper.ExtractAuthorDTO(_appDbContext.Authors.Include("Books").Include("Rates").Single(a => a.Id == id));
         }
 
         public List<GetAuthorDTO> GetAuthors(PaginationDTO pagination)
         {
-            return _elasticHelper.GetAuthorFromElastic(pagination: pagination).ToList();
+            //return _elasticHelper.GetAuthorFromElastic(pagination: pagination).ToList();
+            return _appDbContext.Authors.Include("Books").Include("Rates")
+                                        .Skip(pagination.Page * pagination.Count)
+                                        .Take(pagination.Count)
+                                        .Select(a => _mappingHelper.ExtractAuthorDTO(a))
+                                        .ToList();
         }
         public List<GetAuthorDTO> SearchAuthors(SearchAuthorDTO searchAuthor)
         {

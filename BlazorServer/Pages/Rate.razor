@@ -1,0 +1,56 @@
+﻿@page "/rate/{Option}/{Id:int}"
+@using RepositoryPattern
+
+@inject IBookRepository _bookRepository
+@inject IAuthorRepository _authorRepository
+@inject NavigationManager _navManager
+
+<header>
+    <h1>Add rate</h1>
+    <button type="button" class="btn btn-success" @onclick="() => SaveRate()">Save</button>
+    <button type="button" class="btn btn-danger" @onclick="() => Cancel()">Cancel</button>
+</header>
+<br/>
+<div class="simple-form">
+    <div class="form-group">
+
+        <select class="form-control selectpicker" id="rate" @bind="@rateValue">
+            <option value="0" selected disabled hidden>Select rate</option>
+            <option value="1" >1</option>
+            <option value="2" >2</option>
+            <option value="3" >3</option>
+            <option value="4" >4</option>
+            <option value="5" >5</option>
+
+             
+        </select>
+    </div>
+</div>
+
+        @code
+{
+            [Parameter]
+            public int Id { get; set; }
+
+            [Parameter]
+            public string Option { get; set; }
+
+            public short rateValue { get; set; }
+
+            private void SaveRate()
+            {
+                if (Option == "books")
+                {
+                    _bookRepository.RateBook(Id, Convert.ToInt16(rateValue));
+                }
+                else if (Option == "authors")
+                {
+                    _authorRepository.AddRate(Id, rateValue);
+                }
+                _navManager.NavigateTo($"/{Option}");
+            }
+            private void Cancel()
+            {
+                _navManager.NavigateTo($"/{Option}");
+            }
+        }

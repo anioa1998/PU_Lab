@@ -21,14 +21,16 @@
     <tbody>
         @foreach (var book in books)
         {
-            <tr>
-                <td>@book.Title</td>
-                <td>@book.ReleaseDate.ToString("dd.MM.yyyy")</td>
-                <td>@book.AverageRate</td>
-                <td>@book.RatesCount</td>
-                <td>@string.Join(", ", book.Authors)</td>
-                <td><button class="btn btn-secondary oi oi-pencil" type="button" @onclick="() => EditBook(book.Id)"></button></td>
-            </tr>
+        <tr>
+            <td>@book.Title</td>
+            <td>@book.ReleaseDate.ToString("dd.MM.yyyy")</td>
+            <td>@book.AverageRate</td>
+            <td>@book.RatesCount</td>
+            <td>@string.Join(", ", book.Authors)</td>
+            <td><button class="btn btn-secondary oi oi-pencil" type="button" @onclick="() => EditBook(book.Id)"></button></td>
+            <td><button class="btn btn-secondary oi oi-plus" type="button" @onclick="() => AddRate(book.Id)"></button></td>
+            <td><button class="btn btn-secondary oi oi-x" type="button" @onclick="() => RemoveBook(book.Id)"></button></td>
+        </tr>
         }
     </tbody>
 </table>
@@ -49,9 +51,19 @@
         {
             _navManager.NavigateTo($"/edit/books/{id}");
         }
-        else 
+        else
         {
             _navManager.NavigateTo($"/edit/books");
-        } 
+        }
     }
+
+    private void AddRate(int id)
+    {
+        _navManager.NavigateTo($"/rate/books/{id}");
+    }
+    private void RemoveBook(int id)
+        {
+        _bookRepository.DeleteBook(id);
+        _navManager.NavigateTo("/books");
+        }
 }

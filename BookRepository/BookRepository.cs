@@ -23,8 +23,14 @@ namespace RepositoryPattern
 
         public List<GetBookDTO> GetBooks(PaginationDTO pagination)
         {
-            return _elasticHelper.GetBookFromElastic(pagination: pagination)
-                                 .ToList();
+            // return _elasticHelper.GetBookFromElastic(pagination: pagination)
+            //                    .ToList();
+
+            return _appDbContext.Books.Include("Authors").Include("Rates")
+                                      .Skip(pagination.Page * pagination.Count)
+                                      .Take(pagination.Count)
+                                      .Select(b => _mappingHelper.ExtractBookDTO(b))
+                                      .ToList();
         }
 
         public List<GetBookDTO> SearchBooks(SearchBookDTO searchBook)
@@ -36,8 +42,9 @@ namespace RepositoryPattern
 
         public GetBookDTO GetBook(int id)
         {
-            return _elasticHelper.GetBookFromElastic(id)
-                                .SingleOrDefault();
+            //return _elasticHelper.GetBookFromElastic(id)
+            //                    .SingleOrDefault();
+            return _mappingHelper.ExtractBookDTO(_appDbContext.Books.Include("Authors").Include("Rates").Single(b => b.Id == id));
         }
 
         public bool AddBook(AddBookDTO bookDto)
