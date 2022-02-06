@@ -1,0 +1,17 @@
+﻿@page "/edit/{Option}/{Id:int?}"
+
+<p>
+    Id: @Id
+</p>
+
+<p>
+    Option: @Option
+</p>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    [Parameter]
+    public string Option { get; set; }
+}

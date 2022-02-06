@@ -47,6 +47,7 @@ namespace RepositoryPattern
             newBook.Authors = _appDbContext.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToList();
 
             try
+         
             {
                 _appDbContext.Books.Add(newBook);
                 _appDbContext.SaveChanges();
@@ -110,5 +111,18 @@ namespace RepositoryPattern
             }
         }
 
+        public bool UpdateBook(GetBookDTO bookDTO)
+        {
+            try
+            {
+                _appDbContext.Update(bookDTO);
+                _appDbContext.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

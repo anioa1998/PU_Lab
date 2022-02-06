@@ -1,10 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Model.DTOs
+﻿namespace Model.DTOs
 {
-    public record BookInGetAuthorDTO(int Id, string Title);
+    public class BookInGetAuthorDTO
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+
+        public BookInGetAuthorDTO(int id, string title)
+        {
+            Id = id;
+            Title = title;
+        }
+
+        public override string ToString()
+        {
+            return $"{Title}";
+        }
+    }
 }

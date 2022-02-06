@@ -1,0 +1,59 @@
+﻿@page "/books"
+@using Model.DTOs
+@using RepositoryPattern
+@inject IBookRepository _bookRepository
+@inject NavigationManager _navManager
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Release Date</th>
+            <th>Average Rate</th>
+            <th>Rate Count</th>
+            <th>Authors</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in books)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@book.ReleaseDate.ToString("dd.MM.yyyy")</td>
+                <td>@book.AverageRate</td>
+                <td>@book.RatesCount</td>
+                <td>@string.Join(", ", book.Authors)</td>
+                <td><button class="btn btn-secondary oi oi-pencil" type="button" @onclick="() => EditBook(book.Id)"></button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="pagination">
+    <a href="#">&laquo;</a>
+    <a href="#">1</a>
+    <a href="#">2</a>
+    <a href="#">3</a>
+    <a href="#">4</a>
+    <a href="#">5</a>
+    <a href="#">6</a>
+    <a href="#">&raquo;</a>
+</div>
+
+@code
+{
+    private List<GetBookDTO> books;
+    private PaginationDTO pagination = new PaginationDTO(0, 10);
+
+    protected override async Task OnInitializedAsync()
+    {
+        books = _bookRepository.GetBooks(pagination);
+    }
+
+    private void EditBook(int id)
+    { 
+        _navManager.NavigateTo($"/edit/books/{id}");
+    }
+}

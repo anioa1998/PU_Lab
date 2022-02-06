@@ -1,0 +1,82 @@
+﻿@page "/authors"
+@using Model.DTOs
+@using RepositoryPattern
+@inject IAuthorRepository _authorRepository
+@inject NavigationManager _navManager
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Average Rate</th>
+            <th>Rate Count</th>
+            <th>Books</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var author in authors)
+        {
+            <tr>
+                <td>@author.FirstName</td>
+                <td>@author.SecondName</td>
+                <td>@author.AverageRate</td>
+                <td>@author.RatesCount</td>
+                <td>@booksToAuthors[author.Id]</td>
+                <td><button type="button" @onclick="() => GoToAuthors()"></button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code
+{
+    private List<GetAuthorDTO> authors;
+    private PaginationDTO pagination = new PaginationDTO(0, 10);
+    private Dictionary<int, string> booksToAuthors = new Dictionary<int, string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        authors = _authorRepository.GetAuthors(pagination);
+        SetBookString();
+    }
+
+    private void SetBookString()
+    {
+        authors.ForEach(a =>
+        {
+            string bookString = "";
+            var moreBooks = 0;
+            for (int i = 0; i < a.Books.Count; i++)
+            {
+                if (i < 2)
+                {
+                    bookString += $"{a.Books[i]}, ";
+                }
+                else
+                {
+                    moreBooks++;
+                }
+
+            }
+            if (moreBooks > 0)
+            {
+                bookString += $"+{moreBooks}";
+            }
+            if (bookString.EndsWith(", "))
+            {
+                bookString = bookString.Substring(0, bookString.Count() - 2);
+            }
+
+            booksToAuthors.Add(a.Id, bookString);
+        });
+    }
+
+    private void GoToAuthors()
+    {
+        _navManager.NavigateTo("/authors");
+    }
+}

@@ -17,5 +17,7 @@ namespace RepositoryPattern.Helpers
         bool DeleteAuthorFromElastic(int id);
         bool UpdateBookRateInElastic(int id, double averageRate, int count);
         bool UpdateAuthorRateInElastic(int id, double averageRate, int count);
+        bool UpdateBookInElastic(GetBookDTO bookToUpdate);
+        bool UpdateAuthorInElastic(GetAuthorDTO authorToUpdate);
     }
 }

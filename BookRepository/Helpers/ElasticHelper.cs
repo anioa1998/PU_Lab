@@ -115,16 +115,30 @@ namespace RepositoryPattern.Helpers
             return searchResult.Documents;
         }
 
+        public bool UpdateAuthorInElastic(GetAuthorDTO authorToUpdate)
+        {
+            return _elasticClient.Update<GetAuthorDTO>(authorToUpdate.Id, u => u.Index("get_author").Doc(authorToUpdate)).Result == Result.Updated;
+
+        }
+
         public bool UpdateAuthorRateInElastic(int id, double averageRate, int count)
         {
 
             return _elasticClient.Update<GetAuthorDTO>(id, u => u.Index("get_author").Doc(new GetAuthorDTO(id, averageRate, count))).Result == Result.Updated;
         }
 
+        public bool UpdateBookInElastic(GetBookDTO bookToUpdate)
+        {
+            return _elasticClient.Update<GetBookDTO>(bookToUpdate.Id, u => u.Index("get_book").Doc(bookToUpdate)).Result == Result.Updated;
+
+        }
+
         public bool UpdateBookRateInElastic(int id, double averageRate, int count)
         {
             return _elasticClient.Update<GetBookDTO>(id, u => u.Index("get_book").Doc(new GetBookDTO(id, averageRate, count))).Result == Result.Updated;
         }
+
+
 
     }
 }

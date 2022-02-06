@@ -10,6 +10,7 @@ namespace RepositoryPattern
         List<GetBookDTO> SearchBooks(SearchBookDTO searchBook);
         GetBookDTO GetBook(int id);
         bool AddBook(AddBookDTO bookDto);
+        bool UpdateBook(GetBookDTO bookDTO);
         bool DeleteBook(int id);
         bool RateBook(int id, short rate);
 
