@@ -1,17 +1,127 @@
 ﻿@page "/edit/{Option}/{Id:int?}"
 
-<p>
-    Id: @Id
-</p>
+@using RepositoryPattern
+@using RepositoryPattern.Helpers
+@using Model.DTOs
 
-<p>
-    Option: @Option
-</p>
+@inject IBookRepository _bookRepository
+@inject IAuthorRepository _authorRepository
+@inject IMappingHelper _mappingHelper 
 
-@code {
-    [Parameter]
-    public int? Id { get; set; }
+@if (Option == "books")
+{
+    <header class="h1">Add/Edit Book</header>
+    <div class="simple-form">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" id="title" @bind-value="@bookDTO.Title"><br />
+            <label for="releasedate">Release Date</label>
+            <input type="date" class="form-control" id="releasedate" @bind-value="@bookDTO.ReleaseDate">
 
-    [Parameter]
-    public string Option { get; set; }
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th><label for="availableauthors">Available authors</label></th>
+                        <th>
+                            <select class="form-control selectpicker" id="availableauthors" @bind="@selectedAuthorId">
+                                @foreach (var item in availableAuthors)
+                                {
+                                    if (availableAuthors.IndexOf(item) == 0)
+                                    {
+                                        <option value="@item.Id" selected="selected">@item.FirstName @item.SecondName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.FirstName @item.SecondName</option>
+                                    }
+                                }
+                            </select>
+                        </th>
+                        <th><button type="button" class="btn btn-success" @onclick="() => AddAuthor(selectedAuthorId)">Add author</button></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var addedAuthor in bookAuthors)
+                    {
+                        <tr>
+                            <td>@addedAuthor.FirstName</td>
+                            <td>@addedAuthor.SecondName</td>
+                            <td><button class="btn btn-secondary oi oi-minus" type="button" @onclick="() => RemoveAuthor(addedAuthor)"></button></td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            
+        </div>
+    </div>
 }
+    @if (Option == "authors")
+    {
+        <p>bub 2</p>
+    }
+
+
+
+    @code {
+        [Parameter]
+        public int? Id { get; set; }
+
+        [Parameter]
+        public string Option { get; set; }
+
+        public GetBookDTO bookDTO { get; set; }
+
+        public List<GetAuthorDTO> availableAuthors { get; set; }
+
+        public List<GetAuthorDTO> bookAuthors { get; set; }
+
+        public int selectedAuthorId { get; set; }
+
+        protected override async Task OnInitializedAsync()
+        {
+            await LoadData();
+        }
+
+        protected async Task LoadData()
+        {
+
+            if(Option == "books" && Id.HasValue)
+            {
+                bookAuthors = new List<GetAuthorDTO>();
+
+                bookDTO = _bookRepository.GetBook(Id.Value);
+
+                bookDTO.Authors.ForEach(b => bookAuthors.Add(_authorRepository.GetAuthor(b.Id)));
+
+                availableAuthors = _authorRepository.GetAuthors(new PaginationDTO(0, _authorRepository.CountAuthors()));
+                bookAuthors.ForEach(b => {
+                    var auth = availableAuthors.Find(a => a.Id == b.Id);
+                    availableAuthors.Remove(auth);
+                });
+
+                StateHasChanged();
+            }
+
+            StateHasChanged();
+        }
+
+        private void AddAuthor(int id)
+        {
+            var author = availableAuthors.First(a => a.Id == id);
+            bookAuthors.Add(author);
+            availableAuthors.Remove(author);
+        }
+
+        private void RemoveAuthor(GetAuthorDTO author)
+        {
+            bookAuthors.Remove(author);
+            if (!availableAuthors.Contains(author))
+            {
+                availableAuthors.Add(author);
+            }
+            StateHasChanged();
+        }
+    }

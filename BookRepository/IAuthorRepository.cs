@@ -15,5 +15,7 @@ namespace RepositoryPattern
         public bool AddAuthor(AddAuthorDTO authorDTO);
         public bool DeleteAuthor(int id);
         public bool AddRate(int id, short rate);
+        public bool UpdateAuthor(GetAuthorDTO authorDTO);
+        public int CountAuthors();
     }
 }

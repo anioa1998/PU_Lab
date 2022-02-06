@@ -5,8 +5,6 @@ using RepositoryPattern.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RepositoryPattern
 {
@@ -52,7 +50,7 @@ namespace RepositoryPattern
 
                 var rateCount = author.Rates.Count();
                 var averageRate = author.Rates.Count > 0 ? Math.Round(author.Rates.Average(b => b.Value), 1) : 0;
-               
+
                 if (!_elasticHelper.UpdateAuthorRateInElastic(id, averageRate, rateCount))
                     return false;
 
@@ -62,6 +60,11 @@ namespace RepositoryPattern
             {
                 return false;
             }
+        }
+
+        public int CountAuthors()
+        {
+            return _appDbContext.Authors.Count();
         }
 
         public bool DeleteAuthor(int id)
@@ -97,5 +100,32 @@ namespace RepositoryPattern
             return _elasticHelper.GetAuthorFromElastic(searchAuthor: searchAuthor).ToList();
         }
 
+        public bool UpdateAuthor(GetAuthorDTO authorDTO)
+        {
+            try
+            {
+                var authorModel = _appDbContext.Authors.Find(authorDTO.Id);
+
+                authorModel.FirstName = authorDTO.FirstName;
+                authorModel.SecondName = authorDTO.SecondName;
+                authorModel.Books = _appDbContext.Books.Where(a => authorDTO.Books.Exists(g => g.Id == a.Id)).ToList();
+
+                _appDbContext.Authors.Update(authorModel);
+                _appDbContext.SaveChanges();
+                _elasticHelper.UpdateAuthorInElastic(authorDTO);
+
+                foreach (var bookModel in authorModel.Books)
+                {
+                    var bookDTO = _mappingHelper.ExtractBookDTO(bookModel);
+                    _elasticHelper.UpdateBookInElastic(bookDTO);
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+
+        }
     }
 }

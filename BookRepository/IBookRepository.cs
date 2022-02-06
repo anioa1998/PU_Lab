@@ -13,6 +13,6 @@ namespace RepositoryPattern
         bool UpdateBook(GetBookDTO bookDTO);
         bool DeleteBook(int id);
         bool RateBook(int id, short rate);
-
+        int CountBooks();
     }
 }

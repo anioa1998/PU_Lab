@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Model.DTOs;
+﻿using Model.DTOs;
 using Model.Models;
 using RepositoryPattern.Helpers;
 using System;
@@ -31,13 +30,13 @@ namespace RepositoryPattern
         {
             return _elasticHelper.GetBookFromElastic(searchBook: searchBook)
                                  .ToList();
-                                 
+
         }
 
         public GetBookDTO GetBook(int id)
         {
             return _elasticHelper.GetBookFromElastic(id)
-                                .Single();
+                                .SingleOrDefault();
         }
 
         public bool AddBook(AddBookDTO bookDto)
@@ -47,7 +46,7 @@ namespace RepositoryPattern
             newBook.Authors = _appDbContext.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToList();
 
             try
-         
+
             {
                 _appDbContext.Books.Add(newBook);
                 _appDbContext.SaveChanges();
@@ -100,7 +99,7 @@ namespace RepositoryPattern
 
                 var rateCount = book.Rates.Count();
                 var averageRate = book.Rates.Count > 0 ? Math.Round(book.Rates.Average(b => b.Value), 1) : 0;
-                
+
                 if (!_elasticHelper.UpdateBookRateInElastic(id, averageRate, rateCount))
                     return false;
                 return true;
@@ -115,14 +114,32 @@ namespace RepositoryPattern
         {
             try
             {
-                _appDbContext.Update(bookDTO);
+                var bookModel = _appDbContext.Books.Find(bookDTO.Id);
+
+                bookModel.Title = bookDTO.Title;
+                bookModel.ReleaseDate = bookDTO.ReleaseDate;
+                bookModel.Authors = _appDbContext.Authors.Where(a => bookDTO.Authors.Exists(g => g.Id == a.Id)).ToList();
+
+                _appDbContext.Books.Update(bookModel);
                 _appDbContext.SaveChanges();
+                _elasticHelper.UpdateBookInElastic(bookDTO);
+
+                foreach (var authorModel in bookModel.Authors)
+                {
+                    var authorDTO = _mappingHelper.ExtractAuthorDTO(authorModel);
+                    _elasticHelper.UpdateAuthorInElastic(authorDTO);
+                }
                 return true;
             }
             catch
             {
                 return false;
             }
+        }
+
+        public int CountBooks()
+        {
+            return _appDbContext.Books.Count();
         }
     }
 }
